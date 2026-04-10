@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>weinkya | XAUUSD・BTC トレード分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E2C97E;
+    --gold-dim: #7A6128;
+    --bg: #0A0A0A;
+    --bg2: #111111;
+    --bg3: #181818;
+    --bg4: #1F1F1F;
+    --text: #EDEDED;
+    --text-muted: #888;
+    --text-dim: #555;
+    --border: rgba(201,168,76,0.2);
+    --border-dim: rgba(255,255,255,0.07);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border-dim);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--gold-light);
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold-light); }
+  .nav-cta {
+    background: transparent;
+    border: 0.5px solid var(--gold);
+    color: var(--gold-light);
+    padding: 0.5rem 1.4rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .nav-cta:hover { background: var(--gold); color: #0A0A0A; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 60%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 20%, rgba(201,168,76,0.03) 0%, transparent 60%);
+  }
+  .hero-line {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 0.5px;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent, var(--gold));
+  }
+  .hero-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .hero-tag::before, .hero-tag::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 0.5px;
+    background: var(--gold-dim);
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .hero h1 span { color: var(--gold-light); font-style: italic; }
+  .hero-sub {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
+    max-width: 480px;
+    line-height: 2;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: #0A0A0A;
+    padding: 0.9rem 2.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-secondary {
+    border: 0.5px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.9rem 2.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold-light); }
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  .hero-scroll::after {
+    content: '';
+    display: block;
+    width: 0.5px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold-dim), transparent);
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 1; transform: translateX(-50%) translateY(5px); }
+  }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 1; }
+  .section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 0.5px;
+    background: var(--gold-dim);
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    max-width: 560px;
+    line-height: 2;
+    margin-bottom: 3.5rem;
+  }
+  .divider {
+    width: 100%;
+    height: 0.5px;
+    background: var(--border-dim);
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    background: var(--bg2);
+    border-top: 0.5px solid var(--border-dim);
+    border-bottom: 0.5px solid var(--border-dim);
+    padding: 2.5rem 2rem;
+  }
+  .stats-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* ── PATREON PLANS ── */
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .plan-card {
+    border: 0.5px solid var(--border-dim);
+    background: var(--bg2);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .plan-card:hover { border-color: var(--gold-dim); }
+  .plan-card.featured {
+    border-color: var(--gold);
+    background: linear-gradient(160deg, var(--bg3) 0%, rgba(201,168,76,0.04) 100%);
+  }
+  .plan-badge {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #0A0A0A;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 0.3rem 1.2rem;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .plan-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .plan-price sup { font-size: 1.2rem; vertical-align: super; color: var(--gold-dim); }
+  .plan-price span { font-size: 0.85rem; color: var(--text-muted); }
+  .plan-divider {
+    height: 0.5px;
+    background: var(--border-dim);
+    margin: 1.5rem 0;
+  }
+  .plan-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  .plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .plan-features li::before {
+    content: '—';
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    margin-top: 0.05em;
+  }
+  .plan-features li.highlight { color: var(--text); }
+  .plan-features li.highlight::before { color: var(--gold); }
+  .plan-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 0.85rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .plan-btn-outline {
+    border: 0.5px solid var(--border);
+    color: var(--gold);
+  }
+  .plan-btn-outline:hover { background: rgba(201,168,76,0.08); }
+  .plan-btn-fill {
+    background: var(--gold);
+    color: #0A0A0A;
+    font-weight: 500;
+  }
+  .plan-btn-fill:hover { background: var(--gold-light); }
+
+  /* ── FLOW ── */
+  .flow-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0;
+    position: relative;
+    margin-top: 1rem;
+  }
+  .flow-step {
+    padding: 2rem 1.5rem;
+    border: 0.5px solid var(--border-dim);
+    border-right: none;
+    position: relative;
+    background: var(--bg2);
+    transition: background 0.3s;
+  }
+  .flow-step:last-child { border-right: 0.5px solid var(--border-dim); }
+  .flow-step:hover { background: var(--bg3); }
+  .flow-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: rgba(201,168,76,0.15);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .flow-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+  .flow-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+  .flow-arrow {
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    background: var(--bg);
+    border: 0.5px solid var(--gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+  .flow-step:last-child .flow-arrow { display: none; }
+
+  /* ── YOUTUBE / ARCHIVE ── */
+  .yt-section { background: var(--bg2); }
+  .yt-embed-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: var(--bg3);
+    border: 0.5px solid var(--border-dim);
+    overflow: hidden;
+  }
+  .yt-embed-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  .yt-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+  .yt-play-icon {
+    width: 64px;
+    height: 64px;
+    border: 0.5px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .yt-play-icon:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .archive-card {
+    border: 0.5px solid var(--border-dim);
+    background: var(--bg3);
+    overflow: hidden;
+    transition: border-color 0.3s;
+    text-decoration: none;
+    display: block;
+  }
+  .archive-card:hover { border-color: var(--gold-dim); }
+  .archive-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg4);
+    position: relative;
+    overflow: hidden;
+  }
+  .archive-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+  }
+  .archive-card:hover .archive-thumb img { opacity: 1; }
+  .archive-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    color: var(--gold-dim);
+    font-weight: 300;
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg4) 100%);
+  }
+  .archive-info {
+    padding: 1rem 1.25rem;
+  }
+  .archive-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .archive-title {
+    font-size: 0.82rem;
+    color: var(--text);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .archive-date {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+  }
+
+  /* ── DISCORD PREVIEW ── */
+  .discord-section { background: var(--bg3); }
+  .discord-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .discord-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border-dim);
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .discord-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--gold-dim);
+  }
+  .discord-card.locked::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 30%, var(--bg2) 100%);
+    z-index: 2;
+  }
+  .discord-channel {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .discord-channel::before { content: '# '; }
+  .discord-msg {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .discord-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--bg);
+    font-weight: 500;
+  }
+  .discord-name {
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+  }
+  .discord-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .discord-blur-msg {
+    font-size: 0.8rem;
+    color: transparent;
+    text-shadow: 0 0 8px rgba(201,168,76,0.3);
+    user-select: none;
+    line-height: 1.7;
+  }
+  .discord-lock-badge {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: var(--bg2);
+    border: 0.5px solid var(--gold-dim);
+    color: var(--gold);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    padding: 0.4rem 1.2rem;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .discord-lock-badge:hover { background: var(--gold); color: #0A0A0A; }
+
+  /* ── ABOUT / PROFILE ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .about-visual {
+    aspect-ratio: 3/4;
+    border: 0.5px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .about-monogram {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    font-weight: 300;
+    color: var(--gold-dim);
+    letter-spacing: 0.1em;
+  }
+  .about-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--gold);
+    border-style: solid;
+  }
+  .corner-tl { top: 12px; left: 12px; border-width: 0.5px 0 0 0.5px; }
+  .corner-tr { top: 12px; right: 12px; border-width: 0.5px 0.5px 0 0; }
+  .corner-bl { bottom: 12px; left: 12px; border-width: 0 0 0.5px 0.5px; }
+  .corner-br { bottom: 12px; right: 12px; border-width: 0 0.5px 0.5px 0; }
+  .about-text p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 2.2;
+    margin-bottom: 1.5rem;
+  }
+  .about-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  .about-tag {
+    border: 0.5px solid var(--border-dim);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg2);
+    border-top: 0.5px solid var(--border-dim);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--gold-light);
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .footer-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── RESULTS ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border-dim);
+    border: 0.5px solid var(--border-dim);
+    margin-top: 1rem;
+  }
+  .result-item {
+    background: var(--bg2);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .result-item:hover { background: var(--bg3); }
+  .result-item-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.75rem;
+  }
+  .result-item-chart {
+    width: 100%;
+    height: 80px;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-item-chart svg { width: 100%; height: 100%; }
+  .result-item-pair {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+  .result-item-detail {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .result-pnl {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-top: 0.75rem;
+  }
+  .result-pnl.pos { color: #6BBF8A; }
+  .result-pnl.neg { color: #C46B6B; }
+  .result-disclaimer {
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+    border: 0.5px solid var(--border-dim);
+    background: var(--bg3);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── TWITTER ── */
+  .twitter-section { background: var(--bg2); }
+  .twitter-feed-wrap {
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: 400px;
+  }
+
+  /* ── FAQ ── */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 0.5px solid var(--border-dim);
+    margin-top: 1rem;
+  }
+  .faq-item {
+    border-bottom: 0.5px solid var(--border-dim);
+    background: var(--bg2);
+  }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+    gap: 1rem;
+  }
+  .faq-q:hover { background: var(--bg3); }
+  .faq-icon {
+    color: var(--gold);
+    font-size: 1.2rem;
+    font-weight: 300;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    padding: 0 2rem;
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    line-height: 2;
+  }
+  .faq-item.open .faq-a {
+    max-height: 400px;
+    padding: 0 2rem 1.5rem;
+  }
+  .faq-a a { color: var(--gold); text-decoration: none; }
+  .faq-a a:hover { text-decoration: underline; }
+
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .about-visual { aspect-ratio: 4/3; }
+    .discord-preview { grid-template-columns: 1fr; }
+    .flow-steps { grid-template-columns: 1fr 1fr; }
+    .flow-step { border-right: 0.5px solid var(--border-dim); border-bottom: none; }
+    .flow-arrow { display: none; }
+  }
+  @media (max-width: 480px) {
+    .flow-steps { grid-template-columns: 1fr; }
+    .flow-step { border-right: none; border-bottom: none; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero > * { animation: fadeUp 0.8s ease both; }
+  .hero-tag { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.25s; }
+  .hero-sub { animation-delay: 0.4s; }
+  .hero-btns { animation-delay: 0.55s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">weinkya</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#plans">Plan</a></li>
+    <li><a href="#flow">入会方法</a></li>
+    <li><a href="#youtube">YouTube</a></li>
+    <li><a href="#discord">Discord</a></li>
+    <li><a href="#results">実績</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="https://www.patreon.com/" target="_blank" class="nav-cta">Patreonに参加</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-line"></div>
+  <div class="hero-tag">ICT / SMC Methodology · XAUUSD · BTC</div>
+  <h1>weinkya<br><span>FX Trade</span></h1>
+  <p class="hero-sub">
+    ゴールド・ビットコインをICT/SMC手法で深読みする<br>
+    トレード分析コミュニティ
+  </p>
+  <div class="hero-btns">
+    <a href="#plans" class="btn-primary">プランを見る</a>
+    <a href="https://www.youtube.com/@weinkya" target="_blank" class="btn-secondary">YouTube</a>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-num">XAUUSD</div>
+      <div class="stat-label">Main Instrument</div>
+    </div>
+    <div>
+      <div class="stat-num">BTC</div>
+      <div class="stat-label">Crypto Analysis</div>
+    </div>
+    <div>
+      <div class="stat-num">ICT</div>
+      <div class="stat-label">Methodology</div>
+    </div>
+    <div>
+      <div class="stat-num">Daily</div>
+      <div class="stat-label">Live Stream</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-monogram">W</div>
+        <div class="about-corner corner-tl"></div>
+        <div class="about-corner corner-tr"></div>
+        <div class="about-corner corner-bl"></div>
+        <div class="about-corner corner-br"></div>
+      </div>
+      <div class="about-text">
+        <div class="section-label">About</div>
+        <h2 class="section-title">チャートの向こう側を<br>読む力をつける</h2>
+        <p>
+          weinkyaはXAUUSD（ゴールド）とBTCを中心に、ICT/SMCメソドロジーに基づいたトレード分析を発信するトレーダー・コンテンツクリエイターです。
+        </p>
+        <p>
+          「なぜ価格がそこで動いたのか」——エントリーの根拠から用語の意味まで、体系的に学べるコミュニティを運営しています。YouTubeでの毎日ライブ配信に加え、Patreonメンバー限定の考察・セットアップ公開を行っています。
+        </p>
+        <div class="about-tags">
+          <span class="about-tag">Order Block</span>
+          <span class="about-tag">FVG</span>
+          <span class="about-tag">BOS / MSS</span>
+          <span class="about-tag">CRT</span>
+          <span class="about-tag">OTE</span>
+          <span class="about-tag">BSL / SSL</span>
+          <span class="about-tag">EMA</span>
+          <span class="about-tag">FRVP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PATREON PLANS -->
+<section id="plans">
+  <div class="section-inner">
+    <div class="section-label">Membership</div>
+    <h2 class="section-title">Patreon プラン</h2>
+    <p class="section-desc">3つのプランから、あなたの学習スタイルに合わせてお選びください。すべてDiscordコミュニティへのアクセスが含まれます。</p>
+
+    <div class="plans-grid">
+
+      <!-- PLAN A: 59.99 USD -->
+      <div class="plan-card">
+        <div class="plan-name">Analysis Plan</div>
+        <div class="plan-price"><sup>$</sup>59<span>.99 / 月</span></div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li class="highlight">相場考察（DAY・短期）</li>
+          <li class="highlight">保存考察（中期）</li>
+          <li class="highlight">限定配信（ツイキャス）</li>
+          <li>短期〜中期のバイアス解説</li>
+          <li>重要レベルの定期更新</li>
+        </ul>
+        <a href="https://www.patreon.com/" target="_blank" class="plan-btn plan-btn-outline">このプランに参加</a>
+      </div>
+
+      <!-- PLAN B: 100 USD -->
+      <div class="plan-card">
+        <div class="plan-name">Education Plan</div>
+        <div class="plan-price"><sup>$</sup>100<span> / 月</span></div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li class="highlight">過去エントリー解説</li>
+          <li class="highlight">手法の詳細解説</li>
+          <li class="highlight">用語解説アーカイブ</li>
+          <li class="highlight">SETUP公開</li>
+          <li>ICT/SMCの体系的な学習</li>
+        </ul>
+        <a href="https://www.patreon.com/" target="_blank" class="plan-btn plan-btn-outline">このプランに参加</a>
+      </div>
+
+      <!-- PLAN C: 135 USD (FEATURED) -->
+      <div class="plan-card featured">
+        <div class="plan-badge">すべて閲覧可能</div>
+        <div class="plan-name">Full Access Plan</div>
+        <div class="plan-price"><sup>$</sup>135<span> / 月</span></div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li class="highlight">Analysis Plan の全内容</li>
+          <li class="highlight">Education Plan の全内容</li>
+          <li class="highlight">相場考察 + SETUP公開</li>
+          <li class="highlight">限定ツイキャス配信</li>
+          <li>最上位アクセス</li>
+        </ul>
+        <a href="https://www.patreon.com/" target="_blank" class="plan-btn plan-btn-fill">このプランに参加</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FLOW: Patreon → Discord -->
+<section id="flow">
+  <div class="section-inner">
+    <div class="section-label">How To Join</div>
+    <h2 class="section-title">加入からDiscord連携まで</h2>
+    <p class="section-desc">Patreonに登録後、Discordと連携するまでの流れです。最短5分で完了します。</p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-num">01</div>
+        <div class="flow-title">Patreonに登録</div>
+        <div class="flow-desc">上記のプランから希望のプランを選択し、Patreonアカウントを作成・お支払い手続きを完了してください。</div>
+        <div class="flow-arrow">›</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">02</div>
+        <div class="flow-title">メール確認</div>
+        <div class="flow-desc">Patreonから届く確認メールを開き、メールアドレスを認証します。認証後、Discord連携ページへ自動で案内されます。</div>
+        <div class="flow-arrow">›</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">03</div>
+        <div class="flow-title">Discord連携</div>
+        <div class="flow-desc">Patreonの「Apps」からDiscordを選択し、「Connect」をクリック。Discordアカウントとの連携を承認します。</div>
+        <div class="flow-arrow">›</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">04</div>
+        <div class="flow-title">サーバーへ参加</div>
+        <div class="flow-desc">連携完了後、weinkya Discordサーバーへの招待リンクが表示されます。クリックで参加できます。</div>
+        <div class="flow-arrow">›</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">05</div>
+        <div class="flow-title">ロール付与・完了</div>
+        <div class="flow-desc">プランに対応したロールが自動付与され、限定チャンネルへのアクセスが開放されます。これで完了です。</div>
+        <div class="flow-arrow">›</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- YOUTUBE / ARCHIVE -->
+<section id="youtube" class="yt-section">
+  <div class="section-inner">
+    <div class="section-label">YouTube</div>
+    <h2 class="section-title">ライブ配信・アーカイブ</h2>
+    <p class="section-desc">毎日ライブ配信でXAUUSD・BTCの相場分析を解説。見逃した方はアーカイブからご覧ください。</p>
+
+    <!-- Auto-updating live embed: shows current live if streaming, else latest video -->
+    <div class="yt-embed-wrap">
+      <iframe
+        src="https://www.youtube.com/embed/live_stream?channel=UCCf0_2ZuKxo6jQyauhTXMLA&autoplay=0"
+        title="weinkya FXライブ配信"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <a href="https://www.youtube.com/@weinkya" target="_blank" class="btn-secondary" style="display:inline-block; padding:0.85rem 2.5rem; text-decoration:none; font-size:0.78rem; letter-spacing:0.12em; border:0.5px solid var(--border); color:var(--text-muted); transition:all 0.3s;">
+        YouTubeチャンネルを見る →
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DISCORD PREVIEW -->
+<section id="discord" class="discord-section">
+  <div class="section-inner">
+    <div class="section-label">Community</div>
+    <h2 class="section-title">Discord コミュニティ</h2>
+    <p class="section-desc">メンバー限定のDiscordでは、リアルタイム考察・SETUP共有・用語解説など日々の情報を発信しています。一部内容をプレビューとして公開します。</p>
+
+    <div class="discord-preview">
+      <!-- PUBLIC PREVIEW -->
+      <div class="discord-card">
+        <div class="discord-channel">xauusd-考察</div>
+        <div class="discord-msg">
+          <div class="discord-avatar">W</div>
+          <div>
+            <div class="discord-name">weinkya</div>
+            <div class="discord-text">
+              本日のXAUUSD。H4でBOSを確認後、上位OBへの戻りを待機中。MSS形成次第でエントリー検討。FVG上限付近でのレジスタンスに注意。
+            </div>
+          </div>
+        </div>
+        <div class="discord-msg">
+          <div class="discord-avatar">W</div>
+          <div>
+            <div class="discord-name">weinkya</div>
+            <div class="discord-text">
+              BSLを狩った後の動きが鍵。CRTLOWまでのパスが綺麗に見えている。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOCKED PREVIEW -->
+      <div class="discord-card locked">
+        <div class="discord-channel">setup-公開（メンバー限定）</div>
+        <div class="discord-msg">
+          <div class="discord-avatar">W</div>
+          <div>
+            <div class="discord-name">weinkya</div>
+            <div class="discord-blur-msg">
+              今週のSETUP。エントリートリガー・SL・TP全公開。OTE付近での反応を見る形で...
+            </div>
+          </div>
+        </div>
+        <div class="discord-msg">
+          <div class="discord-avatar">W</div>
+          <div>
+            <div class="discord-name">weinkya</div>
+            <div class="discord-blur-msg">
+              中期考察PDF添付。今月のバイアス継続か反転か、根拠を詳しく解説。
+            </div>
+          </div>
+        </div>
+        <a href="https://discord.gg/YY8BGkEtge" class="discord-lock-badge">🔒 プランに参加して解放</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESULTS / 実績 -->
+<div class="divider"></div>
+<section id="results">
+  <div class="section-inner">
+    <div class="section-label">Track Record</div>
+    <h2 class="section-title">エントリー実績・解説例</h2>
+    <p class="section-desc">過去のエントリーを根拠とともに公開。「なぜそこでエントリーしたか」をICT/SMCの言語で解説しています。</p>
+
+    <div id="results-grid" class="results-grid">
+      <!-- JS で描画 -->
+    </div>
+    <div id="results-empty" style="display:none; text-align:center; padding:4rem 0; color:var(--text-dim); font-size:0.85rem; letter-spacing:0.08em; border:0.5px solid var(--border-dim);">
+      エントリー実績はまもなく公開予定です。
+    </div>
+
+    <div class="result-disclaimer">
+      ※ 掲載している実績・チャートはあくまで参考情報です。過去の実績は将来の利益を保証するものではありません。投資・トレードは自己責任のもとで行ってください。
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     ADMIN PANEL  ( site.html#admin )
+     ════════════════════════════════════ -->
+<div id="admin-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.97); z-index:9999; overflow-y:auto;">
+  <div style="max-width:820px; margin:0 auto; padding:3rem 2rem 6rem;">
+
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3rem; border-bottom:0.5px solid var(--border-dim); padding-bottom:1.5rem;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:var(--gold-light); letter-spacing:0.1em;">weinkya Admin</div>
+        <div style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.15em; margin-top:0.3rem;">TRACK RECORD MANAGER</div>
+      </div>
+      <button onclick="closeAdmin()" style="background:none; border:0.5px solid var(--border-dim); color:var(--text-muted); padding:0.5rem 1.2rem; cursor:pointer; font-size:0.75rem; letter-spacing:0.1em; font-family:'Noto Sans JP',sans-serif;">✕ 閉じる</button>
+    </div>
+
+    <!-- Login -->
+    <div id="admin-login">
+      <div style="max-width:340px; margin:4rem auto; text-align:center;">
+        <div style="font-size:0.7rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:1.5rem; text-transform:uppercase;">パスワードを入力</div>
+        <input id="admin-pw-input" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()"
+          style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.85rem 1rem; font-size:0.88rem; font-family:'Noto Sans JP',sans-serif; margin-bottom:0.75rem; outline:none;">
+        <div id="admin-pw-err" style="color:#C46B6B; font-size:0.75rem; min-height:1.2em; margin-bottom:0.75rem;"></div>
+        <button onclick="checkPw()" style="width:100%; background:var(--gold); color:#0A0A0A; border:none; padding:0.85rem; font-size:0.8rem; letter-spacing:0.12em; font-weight:500; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">ログイン</button>
+      </div>
+    </div>
+
+    <!-- Panel (hidden until login) -->
+    <div id="admin-panel" style="display:none;">
+
+      <!-- PW Change -->
+      <details style="margin-bottom:2rem; border:0.5px solid var(--border-dim);">
+        <summary style="padding:0.85rem 1.25rem; cursor:pointer; font-size:0.75rem; letter-spacing:0.1em; color:var(--text-dim); list-style:none;">⚙ パスワード変更</summary>
+        <div style="padding:1rem 1.25rem; border-top:0.5px solid var(--border-dim); display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <input id="new-pw1" type="password" placeholder="新しいパスワード" style="flex:1; min-width:180px; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.6rem 0.9rem; font-size:0.82rem; font-family:'Noto Sans JP',sans-serif; outline:none;">
+          <input id="new-pw2" type="password" placeholder="確認" style="flex:1; min-width:180px; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.6rem 0.9rem; font-size:0.82rem; font-family:'Noto Sans JP',sans-serif; outline:none;">
+          <button onclick="changePw()" style="background:var(--bg4); border:0.5px solid var(--border-dim); color:var(--text-muted); padding:0.6rem 1.2rem; cursor:pointer; font-size:0.75rem; font-family:'Noto Sans JP',sans-serif;">変更</button>
+        </div>
+        <div id="pw-change-msg" style="padding:0 1.25rem 0.75rem; font-size:0.73rem; min-height:1em;"></div>
+      </details>
+
+      <!-- Add Entry Form -->
+      <div style="border:0.5px solid var(--border); background:var(--bg2); padding:2rem; margin-bottom:2.5rem;">
+        <div style="font-size:0.68rem; letter-spacing:0.22em; color:var(--gold); text-transform:uppercase; margin-bottom:1.5rem;">新規エントリーを追加</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div>
+            <label style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">ペア</label>
+            <input id="f-pair" type="text" placeholder="例: XAUUSD" style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.7rem 0.9rem; font-size:0.85rem; font-family:'Noto Sans JP',sans-serif; outline:none;">
+          </div>
+          <div>
+            <label style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">方向</label>
+            <select id="f-dir" style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.7rem 0.9rem; font-size:0.85rem; font-family:'Noto Sans JP',sans-serif; outline:none;">
+              <option value="Long">Long</option>
+              <option value="Short">Short</option>
+              <option value="SETUP">SETUP</option>
+              <option value="考察">考察</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div>
+            <label style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">日付</label>
+            <input id="f-date" type="date" style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.7rem 0.9rem; font-size:0.85rem; font-family:'Noto Sans JP',sans-serif; outline:none;">
+          </div>
+          <div>
+            <label style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">結果（任意）例: +250pips</label>
+            <input id="f-result" type="text" placeholder="+250pips / 考察中 / TP済" style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.7rem 0.9rem; font-size:0.85rem; font-family:'Noto Sans JP',sans-serif; outline:none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">考察・解説</label>
+          <textarea id="f-desc" rows="4" placeholder="根拠・手法・ICT/SMCタームを使って記述してください"
+            style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text); padding:0.7rem 0.9rem; font-size:0.85rem; font-family:'Noto Sans JP',sans-serif; outline:none; resize:vertical; line-height:1.8;"></textarea>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <label style="font-size:0.68rem; color:var(--text-dim); letter-spacing:0.1em; display:block; margin-bottom:0.4rem;">チャート画像（JPG / PNG / WebP）</label>
+          <input id="f-img" type="file" accept="image/*"
+            style="width:100%; background:var(--bg3); border:0.5px solid var(--border-dim); color:var(--text-muted); padding:0.7rem 0.9rem; font-size:0.8rem; font-family:'Noto Sans JP',sans-serif; cursor:pointer;">
+          <div id="img-preview-wrap" style="margin-top:0.75rem; display:none;">
+            <img id="img-preview" src="" style="max-height:160px; border:0.5px solid var(--border-dim); opacity:0.8;">
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; align-items:center;">
+          <button onclick="addEntry()" style="background:var(--gold); color:#0A0A0A; border:none; padding:0.8rem 2rem; font-size:0.78rem; letter-spacing:0.12em; font-weight:500; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">追加する</button>
+          <button onclick="clearForm()" style="background:none; border:0.5px solid var(--border-dim); color:var(--text-dim); padding:0.8rem 1.2rem; font-size:0.75rem; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">クリア</button>
+          <div id="add-msg" style="font-size:0.75rem; color:#6BBF8A; min-height:1em;"></div>
+        </div>
+      </div>
+
+      <!-- Entry List -->
+      <div style="font-size:0.68rem; letter-spacing:0.22em; color:var(--text-dim); text-transform:uppercase; margin-bottom:1rem;">登録済みエントリー（<span id="entry-count">0</span>件）</div>
+      <div id="admin-entry-list" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TWITTER / X EMBED -->
+<div class="divider"></div>
+<section id="twitter" class="twitter-section">
+  <div class="section-inner">
+    <div class="section-label">Twitter / X</div>
+    <h2 class="section-title">最新ツイート</h2>
+    <p class="section-desc">日々の相場観・速報考察はTwitter/Xでも発信しています。</p>
+    <div class="twitter-feed-wrap">
+      <a href="https://twitter.com/y_weinkyaFX" target="_blank"
+        style="display:flex; align-items:center; gap:1.5rem; border:0.5px solid var(--border); background:var(--bg3); padding:2rem 2.5rem; text-decoration:none; transition:border-color 0.3s; max-width:480px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--gold-dim); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--bg); font-weight:300;">W</div>
+        <div>
+          <div style="font-size:0.95rem; color:var(--text); font-weight:500; margin-bottom:0.3rem;">yweinkya/trader</div>
+          <div style="font-size:0.8rem; color:var(--gold-dim); letter-spacing:0.08em; margin-bottom:0.6rem;">@y_weinkyaFX</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.6;">日々の相場観・XAUUSD/BTC速報考察を発信中</div>
+        </div>
+        <div style="margin-left:auto; color:var(--gold); font-size:1.2rem; flex-shrink:0;">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<div class="divider"></div>
+<section id="faq">
+  <div class="section-inner">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">よくある質問</h2>
+    <p class="section-desc">加入前に気になる点をまとめました。他に質問があればDiscordまたはTwitterからお気軽にどうぞ。</p>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Patreonとは何ですか？クレジットカードなしで使えますか？
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          Patreonはクリエイターのコンテンツを月額サブスクリプションで支援するプラットフォームです。クレジットカードのほか、PayPal・デビットカードにも対応しています。アカウント作成は無料で、プラン登録時に決済情報を入力します。
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          加入後すぐにDiscordに参加できますか？
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          はい、決済完了後にPatreonの「Apps」セクションからDiscordを連携するとすぐに参加できます。ロールは自動で付与されます。手順は<a href="#flow">加入フロー</a>をご参照ください。
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          プランはいつでも変更・解約できますか？
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          はい、Patreonのマイページからいつでもプランの変更・解約が可能です。解約した場合、次の請求日以降は更新されず、課金期間終了後にDiscordのロールも自動で解除されます。
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Analysis Plan（$59.99）とEducation Plan（$100）の違いは？
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          Analysis Planは「相場の今」にフォーカスした考察・配信プランです。DAYトレード〜中期の相場観をリアルタイムで共有します。Education Planは「手法を学ぶ」ことに特化しており、過去エントリー解説・用語解説・SETUP公開など教育コンテンツ中心です。両方を網羅したい場合はFull Access Plan（$135）をお勧めします。
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          初心者でも参加できますか？
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          はい。YouTubeの「チャートが読めない人のための相場分析講座」シリーズを先に視聴いただくと、Discordのコンテンツがよりスムーズに理解できます。Discord内にも用語解説チャンネルを設けていますのでご活用ください。
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ツイキャスの限定配信はいつ行われますか？
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          配信日程はDiscord内の告知チャンネルで事前にアナウンスします。Analysis Plan以上のメンバーが対象です。アーカイブも一定期間保存されますので、見逃した場合も後から視聴できます。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section>
+  <div class="section-inner" style="text-align:center; padding-bottom: 8rem;">
+    <div class="section-label" style="justify-content:center;">Join Now</div>
+    <h2 class="section-title" style="margin:0 auto 1rem;">今すぐコミュニティに参加する</h2>
+    <p style="color:var(--text-muted); font-size:0.88rem; max-width:420px; margin:0 auto 3rem; line-height:2; letter-spacing:0.04em;">
+      Patreonからすぐに参加可能です。<br>Discord連携まで最短5分で完了します。
+    </p>
+    <a href="#plans" class="btn-primary" style="font-size:0.85rem; padding:1rem 3rem;">プランを選ぶ</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">weinkya</div>
+  <div class="footer-links">
+    <a href="https://www.youtube.com/@weinkya" target="_blank">YouTube</a>
+    <a href="https://www.patreon.com/" target="_blank">Patreon</a>
+    <a href="https://twitter.com/y_weinkyaFX" target="_blank">Twitter / X</a>
+    <a href="https://discord.gg/YY8BGkEtge" target="_blank">Discord</a>
+  </div>
+  <div class="footer-copy">© 2025 weinkya · All Rights Reserved</div>
+</footer>
+
+</body>
+<script>
+/* ── FAQ ── */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ══════════════════════════════════════
+   STORAGE HELPERS
+══════════════════════════════════════ */
+const ENTRIES_KEY = 'weinkya_entries';
+const PW_KEY      = 'weinkya_admin_pw';
+
+function getEntries() {
+  try { return JSON.parse(localStorage.getItem(ENTRIES_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveEntries(arr) {
+  localStorage.setItem(ENTRIES_KEY, JSON.stringify(arr));
+}
+function getPw() {
+  return localStorage.getItem(PW_KEY) || 'Unimaguro1212';
+}
+
+/* ══════════════════════════════════════
+   RENDER PUBLIC RESULTS GRID
+══════════════════════════════════════ */
+function renderResults() {
+  const grid  = document.getElementById('results-grid');
+  const empty = document.getElementById('results-empty');
+  const entries = getEntries();
+
+  if (!entries.length) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.style.display  = 'grid';
+
+  grid.innerHTML = entries.map(e => {
+    const dirColor = e.dir === 'Long' ? '#6BBF8A' : e.dir === 'Short' ? '#C46B6B' : 'var(--gold)';
+    const imgHtml  = e.img
+      ? `<div class="result-item-chart" style="height:160px; overflow:hidden;">
+           <img src="${e.img}" style="width:100%; height:100%; object-fit:cover; opacity:0.85;">
+         </div>`
+      : '';
+    const resultHtml = e.result
+      ? `<div class="result-pnl" style="color:${dirColor}; font-size:1.1rem; margin-top:0.75rem;">${escHtml(e.result)}</div>`
+      : '';
+    return `
+      <div class="result-item">
+        <div class="result-item-tag">${escHtml(e.pair)} · ${escHtml(e.dir)}${e.date ? ' · ' + e.date : ''}</div>
+        ${imgHtml}
+        <div class="result-item-pair">${escHtml(e.pair)}</div>
+        <div class="result-item-detail">${escHtml(e.desc).replace(/\n/g,'<br>')}</div>
+        ${resultHtml}
+      </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══════════════════════════════════════
+   ADMIN — OPEN / CLOSE
+══════════════════════════════════════ */
+function openAdmin() {
+  document.getElementById('admin-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  if (isLockedOut()) showLockout();
+}
+function closeAdmin() {
+  document.getElementById('admin-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+/* ── hash routing ── */
+function checkHash() {
+  if (location.hash === '#admin') openAdmin();
+}
+window.addEventListener('hashchange', checkHash);
+checkHash();
+
+/* ══════════════════════════════════════
+   BRUTE FORCE PROTECTION
+══════════════════════════════════════ */
+const MAX_ATTEMPTS  = 5;
+const LOCKOUT_MS    = 30 * 60 * 1000; // 30 minutes
+const ATTEMPT_KEY   = 'weinkya_login_attempts';
+const LOCKOUT_KEY   = 'weinkya_lockout_until';
+
+function getAttempts() { return parseInt(localStorage.getItem(ATTEMPT_KEY) || '0'); }
+function getLockoutUntil() { return parseInt(localStorage.getItem(LOCKOUT_KEY) || '0'); }
+
+function isLockedOut() {
+  const until = getLockoutUntil();
+  if (Date.now() < until) return true;
+  if (until > 0) {
+    localStorage.removeItem(LOCKOUT_KEY);
+    localStorage.removeItem(ATTEMPT_KEY);
+  }
+  return false;
+}
+
+function recordFailedAttempt() {
+  const attempts = getAttempts() + 1;
+  localStorage.setItem(ATTEMPT_KEY, attempts);
+  if (attempts >= MAX_ATTEMPTS) {
+    localStorage.setItem(LOCKOUT_KEY, Date.now() + LOCKOUT_MS);
+    localStorage.removeItem(ATTEMPT_KEY);
+  }
+  return attempts;
+}
+
+function resetAttempts() {
+  localStorage.removeItem(ATTEMPT_KEY);
+  localStorage.removeItem(LOCKOUT_KEY);
+}
+
+function formatCountdown(ms) {
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${m}分${String(s).padStart(2,'0')}秒`;
+}
+
+let lockoutTimer = null;
+function showLockout() {
+  const errEl = document.getElementById('admin-pw-err');
+  const btnEl = document.querySelector('#admin-login button[onclick="checkPw()"]');
+  if (btnEl) btnEl.disabled = true;
+
+  function tick() {
+    const remaining = getLockoutUntil() - Date.now();
+    if (remaining <= 0) {
+      if (btnEl) btnEl.disabled = false;
+      errEl.textContent = '';
+      clearInterval(lockoutTimer);
+      return;
+    }
+    errEl.style.color = '#C46B6B';
+    errEl.textContent = `🔒 ログイン試行が${MAX_ATTEMPTS}回失敗しました。${formatCountdown(remaining)}後に再試行できます。`;
+  }
+  tick();
+  lockoutTimer = setInterval(tick, 1000);
+}
+
+
+function checkPw() {
+  const errEl = document.getElementById('admin-pw-err');
+  if (isLockedOut()) { showLockout(); return; }
+  const val = document.getElementById('admin-pw-input').value;
+  if (val === getPw()) {
+    resetAttempts();
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    renderAdminList();
+  } else {
+    const attempts = recordFailedAttempt();
+    document.getElementById('admin-pw-input').value = '';
+    if (isLockedOut()) {
+      showLockout();
+    } else {
+      const left = MAX_ATTEMPTS - attempts;
+      errEl.style.color = '#C46B6B';
+      errEl.textContent = `パスワードが正しくありません（残り${left}回）`;
+    }
+  }
+}
+
+function changePw() {
+  const p1 = document.getElementById('new-pw1').value.trim();
+  const p2 = document.getElementById('new-pw2').value.trim();
+  const msg = document.getElementById('pw-change-msg');
+  if (!p1) { msg.style.color='#C46B6B'; msg.textContent='パスワードを入力してください'; return; }
+  if (p1 !== p2) { msg.style.color='#C46B6B'; msg.textContent='パスワードが一致しません'; return; }
+  localStorage.setItem(PW_KEY, p1);
+  msg.style.color = '#6BBF8A';
+  msg.textContent = '変更しました';
+  document.getElementById('new-pw1').value = '';
+  document.getElementById('new-pw2').value = '';
+}
+
+/* ══════════════════════════════════════
+   ADMIN — IMAGE PREVIEW
+══════════════════════════════════════ */
+document.getElementById('f-img').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('img-preview').src = e.target.result;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ══════════════════════════════════════
+   ADMIN — ADD ENTRY
+══════════════════════════════════════ */
+function addEntry() {
+  const pair   = document.getElementById('f-pair').value.trim();
+  const dir    = document.getElementById('f-dir').value;
+  const date   = document.getElementById('f-date').value;
+  const result = document.getElementById('f-result').value.trim();
+  const desc   = document.getElementById('f-desc').value.trim();
+  const imgEl  = document.getElementById('img-preview');
+  const img    = imgEl.src && imgEl.src !== window.location.href ? imgEl.src : '';
+
+  if (!pair || !desc) {
+    document.getElementById('add-msg').style.color = '#C46B6B';
+    document.getElementById('add-msg').textContent = 'ペアと考察は必須です';
+    return;
+  }
+
+  const entries = getEntries();
+  entries.unshift({ id: Date.now(), pair, dir, date, result, desc, img });
+  saveEntries(entries);
+  renderResults();
+  renderAdminList();
+  clearForm();
+
+  document.getElementById('add-msg').style.color = '#6BBF8A';
+  document.getElementById('add-msg').textContent = '追加しました ✓';
+  setTimeout(() => document.getElementById('add-msg').textContent = '', 3000);
+}
+
+function clearForm() {
+  document.getElementById('f-pair').value   = '';
+  document.getElementById('f-dir').value    = 'Long';
+  document.getElementById('f-date').value   = '';
+  document.getElementById('f-result').value = '';
+  document.getElementById('f-desc').value   = '';
+  document.getElementById('f-img').value    = '';
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('img-preview').src = '';
+}
+
+/* ══════════════════════════════════════
+   ADMIN — ENTRY LIST (管理画面)
+══════════════════════════════════════ */
+function renderAdminList() {
+  const entries = getEntries();
+  document.getElementById('entry-count').textContent = entries.length;
+  const el = document.getElementById('admin-entry-list');
+
+  if (!entries.length) {
+    el.innerHTML = '<div style="color:var(--text-dim); font-size:0.8rem; padding:1rem;">エントリーはまだありません。</div>';
+    return;
+  }
+
+  el.innerHTML = entries.map(e => `
+    <div style="background:var(--bg2); border:0.5px solid var(--border-dim); padding:1.25rem 1.5rem; display:flex; gap:1rem; align-items:flex-start;">
+      ${e.img ? `<img src="${e.img}" style="width:80px; height:60px; object-fit:cover; flex-shrink:0; opacity:0.75; border:0.5px solid var(--border-dim);">` : '<div style="width:80px; height:60px; background:var(--bg4); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:var(--text-dim); letter-spacing:0.08em;">NO IMG</div>'}
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:0.7rem; color:var(--gold-dim); letter-spacing:0.15em; margin-bottom:0.3rem;">${escHtml(e.pair)} · ${escHtml(e.dir)}${e.date ? ' · ' + e.date : ''}</div>
+        <div style="font-size:0.82rem; color:var(--text); margin-bottom:0.3rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(e.desc.slice(0,80))}${e.desc.length>80?'…':''}</div>
+        ${e.result ? `<div style="font-size:0.75rem; color:#6BBF8A;">${escHtml(e.result)}</div>` : ''}
+      </div>
+      <button onclick="deleteEntry(${e.id})" style="background:none; border:0.5px solid rgba(196,107,107,0.4); color:#C46B6B; padding:0.4rem 0.8rem; cursor:pointer; font-size:0.7rem; font-family:'Noto Sans JP',sans-serif; flex-shrink:0; white-space:nowrap;">削除</button>
+    </div>
+  `).join('');
+}
+
+function deleteEntry(id) {
+  if (!confirm('このエントリーを削除しますか？')) return;
+  const entries = getEntries().filter(e => e.id !== id);
+  saveEntries(entries);
+  renderResults();
+  renderAdminList();
+}
+
+/* ── Init ── */
+renderResults();
+</script>
+</html>
